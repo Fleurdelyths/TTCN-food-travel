@@ -25,8 +25,8 @@ export async function GET(request: Request) {
     const queryParams: any[] = [];
 
     if (search) {
-      query += ` AND (p.name LIKE ? OR p.address LIKE ?)`;
-      queryParams.push(`%${search}%`, `%${search}%`);
+      query += ` AND (p.name LIKE ? OR p.address LIKE ? OR c.name LIKE ? OR pr.name LIKE ?)`;
+      queryParams.push(`%${search}%`, `%${search}%`, `%${search}%`, `%${search}%`);
     }
 
     query += ` ORDER BY p.id DESC`;

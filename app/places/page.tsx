@@ -18,11 +18,11 @@ export default function PlacesPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
-  const fetchPlaces = async () => {
+  const fetchPlaces = async (searchValue = search) => {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/places?search=${encodeURIComponent(search)}`,
+        `/api/places?search=${encodeURIComponent(searchValue)}`,
       );
       const data = await res.json();
       if (data.success) {
@@ -36,7 +36,9 @@ export default function PlacesPage() {
   };
 
   useEffect(() => {
-    fetchPlaces();
+    const initialSearch = new URLSearchParams(window.location.search).get("search") || "";
+    setSearch(initialSearch);
+    fetchPlaces(initialSearch);
   }, []);
 
   return (
@@ -53,7 +55,15 @@ export default function PlacesPage() {
             </p>
           </div>
 
-          <div className="flex gap-2">
+          <form
+            className="flex gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              const query = search.trim();
+              window.history.replaceState(null, "", query ? `/places?search=${encodeURIComponent(query)}` : "/places");
+              fetchPlaces(query);
+            }}
+          >
             <input
               type="text"
               placeholder="Tìm tên quán, địa chỉ..."
@@ -62,12 +72,12 @@ export default function PlacesPage() {
               className="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 text-gray-900 bg-white w-64"
             />
             <button
-              onClick={fetchPlaces}
+              type="submit"
               className="bg-orange-500 text-white px-5 py-2 rounded-lg hover:bg-orange-600 font-medium transition-colors"
             >
               Tìm kiếm
             </button>
-          </div>
+          </form>
         </div>
 
         {/* Danh sách thẻ địa điểm */}

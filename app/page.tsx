@@ -2,8 +2,9 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <div className="space-y-12">
-      <section className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-8 sm:p-12 text-white text-center shadow-lg">
+    <div className="min-h-screen w-full bg-gradient-to-b from-slate-950 via-slate-900 to-amber-950 text-slate-100 p-6 sm:p-10 space-y-12">
+      {/* Hero Banner Cam */}
+      <section className="bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-8 sm:p-12 text-white text-center shadow-2xl">
         <h1 className="text-3xl sm:text-5xl font-extrabold mb-4">
           Khám Phá Món Ngon & Lộ Trình Du Lịch
         </h1>
@@ -25,6 +26,8 @@ export default function HomePage() {
           </Link>
         </div>
       </section>
+
+      {/* Thêm các Section khác bên dưới nếu có... */}
     </div>
   );
 }

@@ -14,11 +14,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="vi">
-      <body className="bg-gray-50 min-h-screen flex flex-col text-gray-900">
+      {/* 1. Đã sửa màu nền tổng của body thành bg-slate-950 màu tối sang trọng */}
+      <body className="bg-slate-950 min-h-screen flex flex-col text-slate-100 antialiased">
         <Navbar />
-        <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-          {children}
-        </main>
+        {/* 2. Đã bỏ max-w-7xl ở thẻ main để background phủ kín 100% màn hình */}
+        <main className="flex-1 w-full">{children}</main>
       </body>
     </html>
   );

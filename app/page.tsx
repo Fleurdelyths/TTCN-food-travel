@@ -155,7 +155,6 @@ export default function HomePage() {
         </div>
         <div className="absolute bottom-0 left-0 right-0 z-10 h-20 bg-gradient-to-t from-[#fffdfa] to-transparent" />
       </section>
-
       <div className="mx-auto max-w-7xl space-y-20 px-5 py-14 sm:px-8 lg:space-y-24 lg:py-20">
         <section>
           <div className="mb-7 flex flex-wrap items-end justify-between gap-4">

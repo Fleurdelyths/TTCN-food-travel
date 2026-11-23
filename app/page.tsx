@@ -307,40 +307,7 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        <section className="grid gap-4 md:grid-cols-3">
-          <Link href="/places" className="home-quick-card">
-            <span className="home-quick-icon">⌕</span>
-            <span><strong>Khám phá địa điểm</strong><small>Tìm quán ăn và điểm đến yêu thích</small></span>
-            <span className="ml-auto text-xl text-orange-500">→</span>
-          </Link>
-          <Link href="/routes" className="home-quick-card">
-            <span className="home-quick-icon">⌁</span>
-            <span><strong>Lên lộ trình</strong><small>Kết hợp các điểm dừng cho chuyến đi</small></span>
-            <span className="ml-auto text-xl text-orange-500">→</span>
-          </Link>
-          <Link href="/register" className="home-quick-card">
-            <span className="home-quick-icon">✳</span>
-            <span><strong>Tham gia ngay</strong><small>Tạo tài khoản và bắt đầu khám phá</small></span>
-            <span className="ml-auto text-xl text-orange-500">→</span>
-          </Link>
-        </section>
-
-        <section className="relative overflow-hidden rounded-[2rem] bg-orange-500 px-7 py-10 text-white sm:px-10 sm:py-12">
-          <div className="absolute -right-12 -top-24 h-72 w-72 rounded-full border-[45px] border-white/10" />
-          <div className="relative flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-            <div>
-              <p className="text-xs font-extrabold tracking-[0.2em] text-orange-100">HÀNH TRÌNH CỦA BẠN BẮT ĐẦU TỪ ĐÂY</p>
-              <h2 className="mt-3 text-2xl font-black sm:text-3xl">Đừng bỏ lỡ một hương vị mới.</h2>
-              <p className="mt-2 max-w-xl text-white/85">Khám phá những địa điểm đang có trong hệ thống và tự chọn điểm đến tiếp theo.</p>
-            </div>
-            <Link href="/places" className="shrink-0 rounded-xl bg-white px-6 py-3 font-extrabold text-orange-600 shadow-lg transition hover:bg-orange-50">
-              Bắt đầu khám phá →
-            </Link>
-          </div>
-        </section>
       </div>
-
       <footer className="border-t border-orange-100 bg-white">
         <div className="mx-auto flex max-w-7xl flex-col gap-3 px-5 py-8 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-8">
           <span className="font-extrabold text-slate-800">Food <span className="text-orange-500">&amp;</span> Travel</span>

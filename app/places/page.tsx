@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -17,7 +16,7 @@ export default function PlacesPage() {
 
     try {
       const res = await fetch(
-        `/api/places?search=${encodeURIComponent(searchValue.trim())}`
+        `/api/places?search=${encodeURIComponent(searchValue.trim())}`,
       );
 
       const data = await res.json();
@@ -34,12 +33,37 @@ export default function PlacesPage() {
 
   // Đọc từ khóa tìm kiếm từ URL khi mở trang
   useEffect(() => {
+    let active = true;
     const initialSearch =
       new URLSearchParams(window.location.search).get("search") || "";
 
-    setSearch(initialSearch);
-    fetchPlaces(initialSearch);
-  }, [fetchPlaces]);
+    async function loadInitial() {
+      try {
+        const res = await fetch(
+          `/api/places?search=${encodeURIComponent(initialSearch.trim())}`,
+        );
+        const data = await res.json();
+
+        if (active) {
+          setSearch(initialSearch);
+          if (data.success) {
+            setPlaces(data.data);
+          }
+        }
+      } catch (err) {
+        console.error("Lỗi lấy danh sách địa điểm:", err);
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadInitial();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Xử lý tìm kiếm bằng nút hoặc phím Enter
   const handleSearch = (event: React.FormEvent<HTMLFormElement>) => {
@@ -50,7 +74,7 @@ export default function PlacesPage() {
     window.history.replaceState(
       null,
       "",
-      query ? `/places?search=${encodeURIComponent(query)}` : "/places"
+      query ? `/places?search=${encodeURIComponent(query)}` : "/places",
     );
 
     fetchPlaces(query);
@@ -62,14 +86,12 @@ export default function PlacesPage() {
     e.stopPropagation();
 
     setFavorites((prev) =>
-      prev.includes(id)
-        ? prev.filter((favId) => favId !== id)
-        : [...prev, id]
+      prev.includes(id) ? prev.filter((favId) => favId !== id) : [...prev, id],
     );
   };
 
   return (
-    <div className="min-h-screen w-full pb-16 bg-gradient-to-b from-[#090d16] via-[#1e1b4b] via-[#4c1d95] to-[#831843] text-slate-100">
+    <div className="min-h-screen w-full pb-16 bg-linear-to-b from-[#090d16] via-[#4c1d95] to-[#831843] text-slate-100">
       <HeaderBanner />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 space-y-8">
@@ -84,10 +106,7 @@ export default function PlacesPage() {
             </p>
           </div>
 
-          <form
-            onSubmit={handleSearch}
-            className="flex gap-2 w-full md:w-auto"
-          >
+          <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
             <div className="relative flex-1 md:w-80">
               <span className="absolute left-3.5 top-2.5 text-slate-400">
                 🔍

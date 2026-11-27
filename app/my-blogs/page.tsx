@@ -31,31 +31,41 @@ export default function MyBlogsPage() {
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
 
-  // Tải danh sách bài viết của người dùng
-  async function load() {
-    try {
-      const r = await fetch("/api/my-blogs");
-      const d = await r.json();
-
-      if (!r.ok) {
-        throw new Error(d.message);
-      }
-
-      setBlogs(d.data);
-    } catch (e) {
-      setMessage(
-        e instanceof Error
-          ? e.message
-          : "Không thể tải dữ liệu."
-      );
-    } finally {
-      setLoading(false);
-    }
-  }
-
   // Tải dữ liệu khi mở trang
   useEffect(() => {
+    let active = true;
+
+    async function load() {
+      try {
+        const r = await fetch("/api/my-blogs");
+        const d = await r.json();
+
+        if (!r.ok) {
+          throw new Error(d.message);
+        }
+
+        if (active) {
+          setBlogs(d.data);
+        }
+      } catch (e) {
+        if (active) {
+          setMessage(
+            e instanceof Error
+              ? e.message
+              : "Không thể tải dữ liệu."
+          );
+        }
+      } finally {
+        if (active) {
+          setLoading(false);
+        }
+      }
+    }
+
     load();
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Xóa bài viết

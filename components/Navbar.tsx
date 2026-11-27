@@ -22,13 +22,30 @@ export default function Navbar() {
 
   // Kiểm tra trạng thái đăng nhập khi chuyển trang
   useEffect(() => {
-    setChecked(false);
+    let active = true;
 
-    fetch("/api/auth/me")
-      .then((response) => response.json())
-      .then((result) => setUser(result?.data?.user ?? null))
-      .catch(() => setUser(null))
-      .finally(() => setChecked(true));
+    async function checkAuth() {
+      try {
+        const response = await fetch("/api/auth/me");
+        const result = await response.json();
+        if (active) {
+          setUser(result?.data?.user ?? null);
+        }
+      } catch {
+        if (active) {
+          setUser(null);
+        }
+      } finally {
+        if (active) {
+          setChecked(true);
+        }
+      }
+    }
+
+    checkAuth();
+    return () => {
+      active = false;
+    };
   }, [pathname]);
 
   // Xử lý đăng xuất

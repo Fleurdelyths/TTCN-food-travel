@@ -1,5 +1,16 @@
 import { NextResponse } from "next/server";
+import type { RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
+
+interface LegacyPlaceRow extends RowDataPacket {
+  id: number;
+  title: string;
+  address: string | null;
+  avg_rating: number | string | null;
+  category_id: number | null;
+  category_name: string | null;
+  primary_image: string | null;
+}
 
 export async function GET(request: Request) {
   try {
@@ -15,7 +26,7 @@ export async function GET(request: Request) {
     }
 
     let filterQuery = `WHERE p.province_id = ?`;
-    const queryParams: any[] = [provinceId];
+    const queryParams: string[] = [provinceId];
 
     if (districtId) {
       filterQuery += ` AND p.district_id = ?`;
@@ -23,7 +34,7 @@ export async function GET(request: Request) {
     }
 
     // Lấy danh sách địa điểm theo Tỉnh/Huyện kèm tên danh mục và ảnh đại diện
-    const [places]: any = await pool.query(
+    const [places] = await pool.execute<LegacyPlaceRow[]>(
       `SELECT 
         p.id,
         p.name AS title,
@@ -42,8 +53,8 @@ export async function GET(request: Request) {
 
     // Tách địa điểm ăn chính và tráng miệng/cà phê
     // Giả định category_id = 1 là Ăn chính, category_id = 2 (hoặc khác 1) là Cà phê/Tráng miệng
-    const mainFoods = places.filter((p: any) => p.category_id === 1);
-    const desserts = places.filter((p: any) => p.category_id !== 1);
+    const mainFoods = places.filter((p) => p.category_id === 1);
+    const desserts = places.filter((p) => p.category_id !== 1);
 
     // Tạo các cặp lộ trình (Ăn chính + Cà phê/Tráng miệng)
     const itineraries = [];
@@ -62,12 +73,12 @@ export async function GET(request: Request) {
       success: true,
       data: itineraries,
     });
-  } catch (error: any) {
+  } catch (error) {
+    console.error("Routes API error:", error);
     return NextResponse.json(
       {
         success: false,
         message: "Lỗi server khi tạo lộ trình",
-        error: error.message,
       },
       { status: 500 },
     );

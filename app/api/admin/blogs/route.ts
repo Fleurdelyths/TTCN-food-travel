@@ -1,5 +1,6 @@
 
 import { NextResponse } from "next/server";
+import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth";
 
@@ -32,9 +33,9 @@ export async function GET(request: Request) {
     ];
 
     // Truy vấn danh sách bài viết
-    const [rows]: any =
+    const [rows] =
       status === "all" || !valid.includes(status)
-        ? await pool.query(
+        ? await pool.query<RowDataPacket[]>(
             `SELECT
               b.id,
               b.title,
@@ -49,7 +50,7 @@ export async function GET(request: Request) {
             JOIN places p ON p.id = b.place_id
             ORDER BY b.created_at DESC`
           )
-        : await pool.execute(
+        : await pool.execute<RowDataPacket[]>(
             `SELECT
               b.id,
               b.title,
@@ -120,7 +121,7 @@ export async function PATCH(request: Request) {
     }
 
     // Cập nhật trạng thái bài viết trong database
-    const [result]: any = await pool.execute(
+    const [result] = await pool.execute<ResultSetHeader>(
       "UPDATE blogs SET status=?,published_at=IF(?='published',COALESCE(published_at,NOW()),NULL) WHERE id=?",
       [status, status, id]
     );

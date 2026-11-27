@@ -65,7 +65,7 @@ export default function BlogEditor({ blogId }: { blogId?: string }) {
 
         if (placeData.success) {
           setPlaces(
-            placeData.data.map((p: any) => ({
+            placeData.data.map((p: { id: number | string; title: string }) => ({
               id: Number(p.id),
               name: p.title,
             }))

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 import { hashPassword } from "@/lib/auth";
 
@@ -23,7 +24,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Mật khẩu xác nhận không khớp." }, { status: 400 });
     }
 
-    const [existing]: any = await pool.execute(
+    const [existing] = await pool.execute<RowDataPacket[]>(
       "SELECT id FROM users WHERE email = ? LIMIT 1",
       [email],
     );
@@ -39,8 +40,13 @@ export async function POST(request: Request) {
     );
 
     return NextResponse.json({ success: true, message: "Đăng ký thành công. Bạn có thể đăng nhập." }, { status: 201 });
-  } catch (error: any) {
-    if (error?.code === "ER_DUP_ENTRY") {
+  } catch (error: unknown) {
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code?: string }).code === "ER_DUP_ENTRY"
+    ) {
       return NextResponse.json({ success: false, message: "Email này đã được đăng ký." }, { status: 409 });
     }
     console.error("Register error:", error);

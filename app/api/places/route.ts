@@ -11,6 +11,9 @@ export async function GET(request: Request) {
         p.id,
         p.name AS title,
         p.address AS address_detail,
+        p.latitude,
+        p.longitude,
+        p.category_id,
         p.rating_average AS avg_rating,
         c.name AS category_name,
         pr.name AS province_name,
@@ -22,7 +25,7 @@ export async function GET(request: Request) {
       WHERE 1=1
     `;
 
-    const queryParams: any[] = [];
+    const queryParams: string[] = [];
 
     if (search) {
       query += ` AND (p.name LIKE ? OR p.address LIKE ? OR c.name LIKE ? OR pr.name LIKE ?)`;
@@ -37,12 +40,12 @@ export async function GET(request: Request) {
       success: true,
       data: rows,
     });
-  } catch (error: any) {
+  } catch (error) {
+    console.error("Places API error:", error);
     return NextResponse.json(
       {
         success: false,
         message: "Lỗi server khi lấy danh sách địa điểm",
-        error: error.message,
       },
       { status: 500 },
     );

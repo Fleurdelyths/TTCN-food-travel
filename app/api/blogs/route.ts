@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -63,7 +64,7 @@ export async function GET(request: Request) {
     const whereSql = where.join(" AND ");
 
     // Đếm tổng số bài viết phù hợp
-    const [countRows]: any = await pool.execute(
+    const [countRows] = await pool.execute<RowDataPacket[]>(
       `
         SELECT COUNT(*) AS total
         FROM blogs b
@@ -74,7 +75,7 @@ export async function GET(request: Request) {
     );
 
     // Lấy danh sách bài viết
-    const [rows]: any = await pool.execute(
+    const [rows] = await pool.query<RowDataPacket[]>(
       `
         SELECT
           b.id,
@@ -166,13 +167,13 @@ export async function POST(request: Request) {
     if (title.length < 5 || title.length > 200) return NextResponse.json({ success: false, message: "Tiêu đề phải từ 5 đến 200 ký tự." }, { status: 400 });
     if (content.length < 30) return NextResponse.json({ success: false, message: "Nội dung cần ít nhất 30 ký tự." }, { status: 400 });
     if (!Number.isInteger(placeId) || placeId <= 0) return NextResponse.json({ success: false, message: "Vui lòng chọn địa điểm được review." }, { status: 400 });
-    const [places]: any = await pool.execute("SELECT id FROM places WHERE id=? LIMIT 1", [placeId]);
+    const [places] = await pool.execute<RowDataPacket[]>("SELECT id FROM places WHERE id=? LIMIT 1", [placeId]);
     if (!places.length) return NextResponse.json({ success: false, message: "Địa điểm không tồn tại." }, { status: 400 });
     const slug = makeSlug(title);
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
-      const [result]: any = await connection.execute(
+      const [result] = await connection.execute<ResultSetHeader>(
         "INSERT INTO blogs (user_id,place_id,category_id,title,slug,excerpt,content,thumbnail,status) VALUES (?,?,?,?,?,?,?,?,?)",
         [user.id, placeId, categoryId, title, slug, excerpt || content.slice(0, 220), content, thumbnail, status],
       );

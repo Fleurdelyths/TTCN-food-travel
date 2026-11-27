@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 import { authCookieOptions, comparePassword, generateToken } from "@/lib/auth";
 
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, message: "Vui lòng nhập email và mật khẩu." }, { status: 400 });
     }
 
-    const [rows]: any = await pool.execute(
+    const [rows] = await pool.execute<RowDataPacket[]>(
       "SELECT id, name, email, password, role, avatar FROM users WHERE email = ? LIMIT 1",
       [email],
     );

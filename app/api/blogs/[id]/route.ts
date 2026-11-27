@@ -1,5 +1,6 @@
 
 import { NextResponse } from "next/server";
+import type { RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -14,7 +15,7 @@ export async function GET(request: Request, context: Context) {
     const { id } = await context.params;
     const user = await getCurrentUser();
 
-    const [rows]: any = await pool.execute(
+    const [rows] = await pool.execute<RowDataPacket[]>(
       `SELECT
         b.id,
         b.user_id,
@@ -109,7 +110,7 @@ if (blog.status === "published") {
 }
     // ==================== LẤY HÌNH ẢNH ====================
 
-    const [images]: any = await pool.execute(
+    const [images] = await pool.execute<RowDataPacket[]>(
       `SELECT id, image_url
        FROM blog_images
        WHERE blog_id = ?
@@ -122,7 +123,7 @@ if (blog.status === "published") {
     let liked = false;
 
     if (user) {
-      const [likes]: any = await pool.execute(
+      const [likes] = await pool.execute<RowDataPacket[]>(
         `SELECT id
          FROM blog_likes
          WHERE blog_id = ? AND user_id = ?
@@ -135,7 +136,7 @@ if (blog.status === "published") {
 
     // ==================== LẤY BÀI VIẾT LIÊN QUAN ====================
 
-    const [related]: any = await pool.execute(
+    const [related] = await pool.execute<RowDataPacket[]>(
       `SELECT id, title, slug, thumbnail
        FROM blogs
        WHERE status = 'published'
@@ -209,7 +210,7 @@ export async function PATCH(
     const { id } = await context.params;
     const body = await request.json();
 
-    const [rows]: any = await pool.execute(
+    const [rows] = await pool.execute<RowDataPacket[]>(
       "SELECT id, user_id, status FROM blogs WHERE id = ?",
       [id]
     );
@@ -271,7 +272,7 @@ export async function PATCH(
       );
     }
 
-    const [places]: any = await pool.execute(
+    const [places] = await pool.execute<RowDataPacket[]>(
       "SELECT id FROM places WHERE id = ?",
       [placeId]
     );
@@ -388,7 +389,7 @@ export async function DELETE(
 
     const { id } = await context.params;
 
-    const [rows]: any = await pool.execute(
+    const [rows] = await pool.execute<RowDataPacket[]>(
       "SELECT user_id FROM blogs WHERE id = ?",
       [id]
     );

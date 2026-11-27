@@ -21,10 +21,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
     setError("");
     setLoading(true);
     try {
+      const payload = isRegister
+        ? { name, email, password, confirmPassword }
+        : { email, password };
       const response = await fetch(`/api/auth/${mode}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, confirmPassword }),
+        body: JSON.stringify(payload),
       });
       const result = await response.json();
       if (!response.ok || !result.success) {

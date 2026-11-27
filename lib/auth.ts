@@ -69,7 +69,7 @@ export async function getCurrentUser(): Promise<AuthUser | null> {
   if (!payload) return null;
 
   // Đọc lại role từ database để quyền thay đổi có hiệu lực ngay lập tức.
-  const [rows]: any = await pool.execute(
+  const [rows] = await pool.execute<import("mysql2").RowDataPacket[]>(
     "SELECT id, name, email, role, avatar FROM users WHERE id = ? LIMIT 1",
     [payload.userId],
   );

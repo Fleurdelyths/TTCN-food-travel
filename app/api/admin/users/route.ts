@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
 
@@ -13,7 +14,7 @@ export async function GET() {
     }
 
     // Không truy vấn hoặc trả về trường password.
-    const [users]: any = await pool.execute(
+    const [users] = await pool.execute<RowDataPacket[]>(
       "SELECT id, name, email, role, avatar, created_at FROM users ORDER BY created_at DESC",
     );
     return NextResponse.json({ success: true, data: { users } });

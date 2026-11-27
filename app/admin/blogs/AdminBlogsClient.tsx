@@ -55,7 +55,37 @@ export default function AdminBlogsPage() {
 
   // Tải lại danh sách khi thay đổi tab
   useEffect(() => {
-    load();
+    let active = true;
+
+    fetch(`/api/admin/blogs?status=${tab}`)
+      .then(async (r) => {
+        const d = await r.json();
+        if (!r.ok) {
+          throw new Error(d.message);
+        }
+        return d;
+      })
+      .then((d) => {
+        if (active) {
+          setBlogs(d.data);
+        }
+      })
+      .catch((e) => {
+        if (active) {
+          setMessage(
+            e instanceof Error ? e.message : "Không thể tải dữ liệu."
+          );
+        }
+      })
+      .finally(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
   }, [tab]);
 
   // Cập nhật trạng thái bài viết
@@ -127,7 +157,10 @@ export default function AdminBlogsPage() {
         {tabs.map((t) => (
           <button
             key={t.id}
-            onClick={() => setTab(t.id)}
+            onClick={() => {
+              setLoading(true);
+              setTab(t.id);
+            }}
             className={`rounded-full px-4 py-2 text-sm font-semibold ${
               tab === t.id
                 ? "bg-orange-500 text-white"

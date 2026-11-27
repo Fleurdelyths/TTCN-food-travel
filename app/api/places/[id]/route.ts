@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import type { RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 
 export async function GET(
@@ -9,7 +10,7 @@ export async function GET(
     const resolvedParams = await params;
     const placeId = resolvedParams.id;
 
-    const [places]: any = await pool.query(
+    const [places] = await pool.query<RowDataPacket[]>(
       `SELECT p.*, 
               p.name AS title,
               p.address AS address_detail,
@@ -45,9 +46,10 @@ export async function GET(
         images,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Unknown error";
     return NextResponse.json(
-      { success: false, message: "Lỗi server", error: error.message },
+      { success: false, message: "Lỗi server", error: message },
       { status: 500 },
     );
   }

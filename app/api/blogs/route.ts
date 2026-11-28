@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { ResultSetHeader, RowDataPacket } from "mysql2";
 import { pool } from "@/lib/db";
 import { getCurrentUser } from "@/lib/auth";
+import { getPublishedBlogs } from "@/lib/blogs";
 
 export const dynamic = "force-dynamic";
 
@@ -10,127 +11,25 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
 
-    // Lấy từ khóa tìm kiếm
     const search = (searchParams.get("search") || "").trim();
-
-    // Tách từ khóa thành từng từ
-    const keywords = search
-      .split(/\s+/)
-      .filter((word) => word.length > 0);
-
-    // Lấy danh mục được chọn
     const categoryId = Number(searchParams.get("category_id") || 0);
-
-    // Phân trang
-    const page = Math.max(1, Number(searchParams.get("page") || 1));
+    const page = Math.max(1, Number(searchParams.get("page") || 1) || 1);
     const limit = Math.min(
       18,
-      Math.max(1, Number(searchParams.get("limit") || 9))
-    );
-    const offset = (page - 1) * limit;
-
-    // Điều kiện mặc định: chỉ lấy bài đã xuất bản
-    const where: string[] = ["b.status = 'published'"];
-    const params: (string | number)[] = [];
-
-    // Tìm kiếm từng từ khóa
-    // Mỗi từ có thể nằm ở tiêu đề, mô tả, nội dung hoặc địa điểm
-    for (const word of keywords) {
-      where.push(`
-        (
-          b.title LIKE ?
-          OR b.excerpt LIKE ?
-          OR b.content LIKE ?
-          OR p.name LIKE ?
-        )
-      `);
-
-      const keyword = `%${word}%`;
-
-      params.push(
-        keyword,
-        keyword,
-        keyword,
-        keyword
-      );
-    }
-
-    // Lọc theo danh mục
-    if (categoryId > 0) {
-      where.push("b.category_id = ?");
-      params.push(categoryId);
-    }
-
-    const whereSql = where.join(" AND ");
-
-    // Đếm tổng số bài viết phù hợp
-    const [countRows] = await pool.execute<RowDataPacket[]>(
-      `
-        SELECT COUNT(*) AS total
-        FROM blogs b
-        JOIN places p ON p.id = b.place_id
-        WHERE ${whereSql}
-      `,
-      params
+      Math.max(1, Number(searchParams.get("limit") || 9) || 9)
     );
 
-    // Lấy danh sách bài viết
-    const [rows] = await pool.query<RowDataPacket[]>(
-      `
-        SELECT
-          b.id,
-          b.title,
-          b.slug,
-          b.excerpt,
-          b.thumbnail,
-          b.like_count,
-          b.view_count,
-          b.created_at,
-          b.published_at,
-
-          u.id AS author_id,
-          u.name AS author_name,
-          u.avatar AS author_avatar,
-
-          p.id AS place_id,
-          p.name AS place_name,
-
-          c.id AS category_id,
-          c.name AS category_name,
-
-          (
-            SELECT COUNT(*)
-            FROM blog_comments bc
-            WHERE bc.blog_id = b.id
-              AND bc.status = 'visible'
-          ) AS comment_count
-
-        FROM blogs b
-        JOIN users u ON u.id = b.user_id
-        JOIN places p ON p.id = b.place_id
-        LEFT JOIN categories c ON c.id = b.category_id
-
-        WHERE ${whereSql}
-
-        ORDER BY
-          COALESCE(b.published_at, b.created_at) DESC
-
-        LIMIT ? OFFSET ?
-      `,
-      [...params, limit, offset]
-    );
-
-    const total = Number(countRows[0]?.total || 0);
+    const result = await getPublishedBlogs({
+      search,
+      categoryId,
+      page,
+      limit,
+    });
 
     return NextResponse.json({
       success: true,
-      data: rows,
-      pagination: {
-        page,
-        limit,
-        total,
-        totalPages: Math.ceil(total / limit),
-      },
+      data: result.data,
+      pagination: result.pagination,
     });
   } catch (error) {
     console.error("GET /api/blogs:", error);
